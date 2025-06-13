@@ -1,0 +1,29 @@
+services:
+
+  hfr-service:
+    image: opengpunetwork/hfr-client:latest
+    pull_policy: always
+    ports:
+      - "${PORT}:5555"
+    extra_hosts: 
+      - "host.docker.internal:host-gateway"
+    environment:
+      - CALLBACK_URL=${CALLBACK_URL}
+      - 'PIPE_ARGS_STR={"task": "visual-question-answering", "model": "dandelin/vilt-b32-finetuned-vqa"}'
+    volumes:
+      - huggingface_cache:/root/.cache/huggingface
+    networks:
+      - app_network
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+networks:
+  app_network:
+    driver: bridge
+
+volumes:
+  huggingface_cache:
